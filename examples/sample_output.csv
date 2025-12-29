@@ -1,0 +1,3 @@
+channel,username,message,send,planned_action
+#alerts,Bot,New lead signed up,yes,would_send
+#alerts,Bot,Just a draft,no,skip

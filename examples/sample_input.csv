@@ -1,0 +1,3 @@
+channel,username,message,send
+#alerts,Bot,New lead signed up,yes
+#alerts,Bot,Just a draft,no
