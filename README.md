@@ -21,3 +21,8 @@ A demo `sample_input.csv` is auto-created if missing.
 
 ## Notes
 This project is wired for future Slack API integration via `src/config.py`, but by default it runs fully offline in DEMO mode.
+
+
+## 🚀 Ready-made Automation Pack
+If you're looking for a plug-and-play solution, check out my automation pack on Gumroad:
+👉 https://khalidelfakir.gumroad.com
