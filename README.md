@@ -22,23 +22,32 @@ channel,username,message,send,planned_action
 
 ## What it does
 - Reads a CSV exported from a spreadsheet with the columns `channel`, `username`, `message`, `send`.
-- Marks each row `would_send` when `send` is `yes`, `y`, `true` or `1` (case-insensitive), otherwise `skip`.
-- Writes the plan, with the extra `planned_action` column, to `examples/sample_output.csv`.
+- Marks each row `would_send` when `send` is `yes`, `y`, `true` or `1` (case-insensitive, surrounding spaces ignored), otherwise `skip`.
+- Writes the plan, with the extra `planned_action` column, to `output/notification_plan.csv`.
+
+Only the `send` column drives the decision; `channel`, `username`, `message` and any other columns are copied to the plan unchanged.
 
 It does not connect to Google Sheets and does not send anything to Slack: it only produces the sending plan.
-`src/config.py` holds the `DEMO_MODE` flag and placeholders for a future Slack webhook integration, which is not implemented.
+`src/config.py` only holds a `DEMO_MODE` flag; setting it to `False` just logs that live sending is not implemented.
 
 ## Quick start
 Tested with Python 3.11. No external dependencies (standard library only).
 
 ```bash
+pip install -r requirements.txt   # nothing to install
 python src/main.py
+```
+
+The plan is written to `output/notification_plan.csv` (git-ignored). To use other files:
+
+```bash
+python src/main.py --input path/to/export.csv --output path/to/plan.csv
 ```
 
 ## Sample data
 `examples/sample_input.csv` contains two messages, one to send and one draft.
-If the file is missing, the script recreates it before running.
+If the file is missing and no `--input` is given, the script recreates it before running.
 
 ## Adapting it to your data
-Export your sheet as CSV with the same four column headers and save it as `examples/sample_input.csv`.
-Other columns are kept and copied to the output.
+Export your sheet as CSV (File > Download > CSV) with a `send` column, and pass it with `--input`.
+Other columns are kept and copied to the output; a file without a `send` column marks every row `skip`.
