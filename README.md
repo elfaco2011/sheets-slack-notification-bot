@@ -1,42 +1,44 @@
-# Google Sheets to Slack Automation Bot
+# Sheets to Slack Notification Planner
 
-## 🔍 Problem
-Manually monitoring Google Sheets and deciding when to send Slack notifications is repetitive and error-prone, especially for teams working with structured data.
+## Problem
+Deciding which rows of a spreadsheet should become Slack notifications is a manual, repetitive check.
 
-## ✅ Solution
-This Python automation bot reads spreadsheet rows, evaluates custom conditions, and prepares Slack messages automatically, turning spreadsheet data into actionable notifications.
+## Example output
+Input (`examples/sample_input.csv`, a CSV export of the sheet):
 
+```text
+channel,username,message,send
+#alerts,Bot,New lead signed up,yes
+#alerts,Bot,Just a draft,no
+```
 
-Notification planner that turns spreadsheet rows into Slack messages. In DEMO mode it does **not** call Slack; it only prepares a sending plan.
+Output (`examples/sample_output.csv`), produced by running the script on the file above:
 
-## 🚀 Features
-- Reads `examples/sample_input.csv` with columns `channel, username, message, send`.
-- Decides whether each row should be sent (`would_send`) or `skip`.
-- Writes the plan to `examples/sample_output.csv`.
+```text
+channel,username,message,send,planned_action
+#alerts,Bot,New lead signed up,yes,would_send
+#alerts,Bot,Just a draft,no,skip
+```
 
-## 🛠 Tech Stack
-- Python
-- CSV processing
-- Slack message formatting
-- Workflow automation
+## What it does
+- Reads a CSV exported from a spreadsheet with the columns `channel`, `username`, `message`, `send`.
+- Marks each row `would_send` when `send` is `yes`, `y`, `true` or `1` (case-insensitive), otherwise `skip`.
+- Writes the plan, with the extra `planned_action` column, to `examples/sample_output.csv`.
 
+It does not connect to Google Sheets and does not send anything to Slack: it only produces the sending plan.
+`src/config.py` holds the `DEMO_MODE` flag and placeholders for a future Slack webhook integration, which is not implemented.
 
-## How to run (DEMO)
+## Quick start
+Tested with Python 3.11. No external dependencies (standard library only).
+
 ```bash
-cd sheets-slack-notification-bot
 python src/main.py
 ```
 
-A demo `sample_input.csv` is auto-created if missing.
+## Sample data
+`examples/sample_input.csv` contains two messages, one to send and one draft.
+If the file is missing, the script recreates it before running.
 
-## Inputs & outputs
-- **Input:** `examples/sample_input.csv` (messages to evaluate).
-- **Output:** `examples/sample_output.csv` with `planned_action` column.
-
-## Notes
-This project is wired for future Slack API integration via `src/config.py`, but by default it runs fully offline in DEMO mode.
-
-
-## 📦 Ready-made Automation Pack
-If you're looking for a plug-and-play solution, check out my automation pack on Gumroad:
-👉 https://khalidelfakir.gumroad.com
+## Adapting it to your data
+Export your sheet as CSV with the same four column headers and save it as `examples/sample_input.csv`.
+Other columns are kept and copied to the output.
