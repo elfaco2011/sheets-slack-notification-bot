@@ -50,4 +50,4 @@ If the file is missing and no `--input` is given, the script recreates it before
 
 ## Adapting it to your data
 Export your sheet as CSV (File > Download > CSV) with a `send` column, and pass it with `--input`.
-Other columns are kept and copied to the output; a file without a `send` column marks every row `skip`.
+Other columns are kept and copied to the output. A file without a `send` column stops with the error `missing required column: send`.

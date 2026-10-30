@@ -58,6 +58,10 @@ def run() -> None:
         fieldnames = reader.fieldnames or []
         rows = list(reader)
 
+    if "send" not in fieldnames:
+        logging.error("missing required column: send (found: %s)", ", ".join(fieldnames) or "none")
+        sys.exit(1)
+
     if not rows:
         logging.warning("No notifications to process.")
         return
