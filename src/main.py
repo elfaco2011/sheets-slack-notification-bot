@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import logging
+import sys
 from pathlib import Path
 
 import config
 
 HERE = Path(__file__).resolve().parent
-EXAMPLES_DIR = HERE.parent / "examples"
-INPUT_PATH = EXAMPLES_DIR / "sample_input.csv"
-OUTPUT_PATH = EXAMPLES_DIR / "sample_output.csv"
+ROOT_DIR = HERE.parent
+EXAMPLES_DIR = ROOT_DIR / "examples"
+DEFAULT_INPUT = EXAMPLES_DIR / "sample_input.csv"
+DEFAULT_OUTPUT = ROOT_DIR / "output" / "notification_plan.csv"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,11 +20,20 @@ logging.basicConfig(
 )
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build a Slack notification plan from a CSV export.")
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT,
+                        help="input CSV (default: examples/sample_input.csv)")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT,
+                        help="plan CSV (default: output/notification_plan.csv)")
+    return parser.parse_args()
+
+
 def _ensure_demo_input() -> None:
-    if INPUT_PATH.exists():
+    if DEFAULT_INPUT.exists():
         return
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    with INPUT_PATH.open("w", newline="") as f:
+    with DEFAULT_INPUT.open("w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["channel", "username", "message", "send"])
         writer.writerow(["#alerts", "Bot", "New lead signed up", "yes"])
@@ -34,9 +46,14 @@ def _should_send(flag: str) -> bool:
 
 
 def run() -> None:
-    _ensure_demo_input()
+    args = _parse_args()
+    if args.input == DEFAULT_INPUT:
+        _ensure_demo_input()
+    if not args.input.exists():
+        logging.error("Input file not found: %s", args.input)
+        sys.exit(1)
 
-    with INPUT_PATH.open(newline="") as f:
+    with args.input.open(newline="") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames or []
         rows = list(reader)
@@ -46,7 +63,8 @@ def run() -> None:
         return
 
     out_fieldnames = fieldnames + ["planned_action"]
-    with OUTPUT_PATH.open("w", newline="") as f:
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with args.output.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=out_fieldnames)
         writer.writeheader()
         for row in rows:
@@ -58,7 +76,7 @@ def run() -> None:
             writer.writerow(row)
 
     if config.DEMO_MODE:
-        logging.info("DEMO mode: no real Slack calls; plan saved to %s", OUTPUT_PATH)
+        logging.info("DEMO mode: no real Slack calls; plan saved to %s", args.output)
     else:
         logging.info("LIVE mode not implemented; only planning is supported.")
 
